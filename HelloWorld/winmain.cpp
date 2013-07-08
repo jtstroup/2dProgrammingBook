@@ -1,8 +1,3 @@
-// Programming 2D Games
-// Copyright (c) 2011 by:
-// Charles Kelly
-// Chapter 2 "Hello World" Windows Style v1.0
-// winmain.cpp
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -10,6 +5,7 @@
 
 // Function prototypes
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int); 
+bool AnotherInstance();
 bool CreateMainWindow(HINSTANCE, int);
 LRESULT WINAPI WinProc(HWND, UINT, WPARAM, LPARAM); 
 
@@ -23,23 +19,12 @@ bool vkKeys[256];	// state of virtual keys, false or true
 
 // Constants
 
-//Hello World
-//const char CLASS_NAME[]  = "WinMain";
-//const char APP_TITLE[]   = "Hello World";   // title bar text
-//const int  WINDOW_WIDTH  = 400;             // width of window
-//const int  WINDOW_HEIGHT = 400;             // height of window
-
-//Keyboard Input 
-//const char CLASS_NAME[]  = "Keyboard";
-//const char APP_TITLE[]   = "Character Input";   // title bar text
-//const int  WINDOW_WIDTH  = 400;					// width of window
-//const int  WINDOW_HEIGHT = 300;					// height of window
-
 //Keys down
 const char CLASS_NAME[]  = "Keyboard";
 const char APP_TITLE[]   = "Keys Down";   // title bar text
 const int  WINDOW_WIDTH  = 400;					// width of window
 const int  WINDOW_HEIGHT = 400;					// height of window
+
 //=============================================================================
 // Starting point for a Windows application
 // Parameters are:
@@ -48,10 +33,7 @@ const int  WINDOW_HEIGHT = 400;					// height of window
 //   lpCmdLine - pointer to null-terminated string of command line arguments
 //   nCmdShow - specifies how the window is to be shown
 //=============================================================================
-int WINAPI WinMain( HINSTANCE hInstance,
-                    HINSTANCE hPrevInstance,
-                    LPSTR     lpCmdLine,
-                    int       nCmdShow)
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     MSG	 msg;
 
@@ -266,4 +248,22 @@ bool CreateMainWindow(HINSTANCE hInstance, int nCmdShow)
     // Send a WM_PAINT message to the window procedure
     UpdateWindow(hwnd);
     return true;
+}
+
+//=============================================================================
+// Checks for another instance of the current application
+// Returns: true if another instance is found
+//          false if this is the only one
+//=============================================================================
+bool AnotherInstance()
+{
+    HANDLE ourMutex;
+
+    // Attempt to create a mutex using our unique string
+    ourMutex = CreateMutex(NULL, true, "Use_a_different_string_here_for_each_program_48161-XYZZY");
+
+    if (GetLastError() == ERROR_ALREADY_EXISTS)
+        return true;            // another instance was found
+    
+    return false;               // we are the only instance
 }
