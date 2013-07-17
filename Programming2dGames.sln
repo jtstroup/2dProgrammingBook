@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorld", "HelloWorld\HelloWorld.vcxproj", "{A1A25D42-DBCF-4CEA-884E-56C8B30FC37D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectX Window", "..\..\Chapter3\DirectX\DirectX Window\DirectX Window.vcxproj", "{0259B800-2046-467E-94A2-D13B6F5210BC}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnginePart1", "..\..\Chapter4\EnginePart1\EnginePart1.vcxproj", "{923625D3-C7E3-4514-8B33-438E7291577E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EnginePart1", "EnginePart1\EnginePart1.vcxproj", "{923625D3-C7E3-4514-8B33-438E7291577E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +15,6 @@ Global
 		{A1A25D42-DBCF-4CEA-884E-56C8B30FC37D}.Debug|Win32.Build.0 = Debug|Win32
 		{A1A25D42-DBCF-4CEA-884E-56C8B30FC37D}.Release|Win32.ActiveCfg = Release|Win32
 		{A1A25D42-DBCF-4CEA-884E-56C8B30FC37D}.Release|Win32.Build.0 = Release|Win32
-		{0259B800-2046-467E-94A2-D13B6F5210BC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0259B800-2046-467E-94A2-D13B6F5210BC}.Debug|Win32.Build.0 = Debug|Win32
-		{0259B800-2046-467E-94A2-D13B6F5210BC}.Release|Win32.ActiveCfg = Release|Win32
-		{0259B800-2046-467E-94A2-D13B6F5210BC}.Release|Win32.Build.0 = Release|Win32
 		{923625D3-C7E3-4514-8B33-438E7291577E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{923625D3-C7E3-4514-8B33-438E7291577E}.Debug|Win32.Build.0 = Debug|Win32
 		{923625D3-C7E3-4514-8B33-438E7291577E}.Release|Win32.ActiveCfg = Release|Win32
