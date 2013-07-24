@@ -12,6 +12,7 @@ Graphics::Graphics()
 {
     direct3d = NULL;
     device3d = NULL;
+	sprite = NULL;
     fullscreen = false;
     width = GAME_WIDTH;    // width & height are replaced in initialize()
     height = GAME_HEIGHT;
@@ -31,6 +32,7 @@ Graphics::~Graphics()
 //=============================================================================
 void Graphics::releaseAll()
 {
+	SAFE_RELEASE(sprite);
     SAFE_RELEASE(device3d);
     SAFE_RELEASE(direct3d);
 }
@@ -121,6 +123,60 @@ void Graphics::initD3Dpp()
 }
 
 //=============================================================================
+// Load the texture into default D3D memory (normal texture use)
+// For internal engine use only. Use the TextureManager class to load game textures.
+// Pre: filename is name of texture file.
+//      transcolor is transparent color
+// Post: width and height = size of texture
+//       texture points to texture
+// Returns HRESULT
+//=============================================================================
+HRESULT Graphics::loadTexture(const char *filename, COLOR_ARGB transcolor,
+                                UINT &width, UINT &height, LP_TEXTURE &texture)
+{
+    // The struct for reading file info
+    D3DXIMAGE_INFO info;
+    result = E_FAIL;
+
+    try{
+        if(filename == NULL)
+        {
+            texture = NULL;
+            return D3DERR_INVALIDCALL;
+        }
+    
+        // Get width and height from file
+        result = D3DXGetImageInfoFromFile(filename, &info);
+        if (result != D3D_OK)
+            return result;
+        width = info.Width;
+        height = info.Height;
+    
+        // Create the new texture by loading from file
+        result = D3DXCreateTextureFromFileEx( 
+            device3d,           //3D device
+            filename,           //image filename
+            info.Width,         //texture width
+            info.Height,        //texture height
+            1,                  //mip-map levels (1 for no chain)
+            0,                  //usage
+            D3DFMT_UNKNOWN,     //surface format (default)
+            D3DPOOL_DEFAULT,    //memory class for the texture
+            D3DX_DEFAULT,       //image filter
+            D3DX_DEFAULT,       //mip filter
+            transcolor,         //color key for transparency
+            &info,              //bitmap file info (from loaded file)
+            NULL,               //color palette
+            &texture );         //destination texture
+
+    } catch(...)
+    {
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error in Graphics::loadTexture"));
+    }
+    return result;
+}
+
+//=============================================================================
 // Display the backbuffer
 //=============================================================================
 HRESULT Graphics::showBackbuffer()
@@ -157,6 +213,64 @@ bool Graphics::isAdapterCompatible()
 }
 
 //=============================================================================
+// Draw the sprite described in SpriteData structure
+// Color is optional, it is applied like a filter, WHITE is default (no change)
+// Pre : sprite->Begin() is called
+// Post: sprite->End() is called
+// spriteData.rect defines the portion of spriteData.texture to draw
+//   spriteData.rect.right must be right edge + 1
+//   spriteData.rect.bottom must be bottom edge + 1
+//=============================================================================
+void Graphics::drawSprite(const SpriteData &spriteData, COLOR_ARGB color)
+{
+	if(spriteData.texture == NULL)      // if no texture
+        return;
+
+    // Find center of sprite
+    D3DXVECTOR2 spriteCenter=D3DXVECTOR2((float)(spriteData.width/2*spriteData.scale),
+                                        (float)(spriteData.height/2*spriteData.scale));
+    // Screen position of the sprite
+    D3DXVECTOR2 translate=D3DXVECTOR2((float)spriteData.x,(float)spriteData.y);
+    // Scaling X,Y
+    D3DXVECTOR2 scaling(spriteData.scale,spriteData.scale);
+    if (spriteData.flipHorizontal)  // if flip horizontal
+    {
+        scaling.x *= -1;            // negative X scale to flip
+        // Get center of flipped image.
+        spriteCenter.x -= (float)(spriteData.width*spriteData.scale);
+        // Flip occurs around left edge, translate right to put
+        // Flipped image in same location as original.
+        translate.x += (float)(spriteData.width*spriteData.scale);
+    }
+    if (spriteData.flipVertical)    // if flip vertical
+    {
+        scaling.y *= -1;            // negative Y scale to flip
+        // Get center of flipped image
+        spriteCenter.y -= (float)(spriteData.height*spriteData.scale);
+        // Flip occurs around top edge, translate down to put
+        // Flipped image in same location as original.
+        translate.y += (float)(spriteData.height*spriteData.scale);
+    }
+    // Create a matrix to rotate, scale and position our sprite
+    D3DXMATRIX matrix;
+    D3DXMatrixTransformation2D(
+        &matrix,                // the matrix
+        NULL,                   // keep origin at top left when scaling
+        0.0f,                   // no scaling rotation
+        &scaling,               // scale amount
+        &spriteCenter,          // rotation center
+        (float)(spriteData.angle),  // rotation angle
+        &translate);            // X,Y location
+
+    // Tell the sprite about the matrix "Hello Neo"
+    sprite->SetTransform(&matrix);
+
+    // Draw the sprite
+    sprite->Draw(spriteData.texture,&spriteData.rect,NULL,NULL,color);
+}
+
+
+//=============================================================================
 // Test for lost device
 //=============================================================================
 HRESULT Graphics::getDeviceState()
@@ -179,3 +293,64 @@ HRESULT Graphics::reset()
     return result;
 }
 
+
+//=============================================================================
+// Toggle window or fullscreen mode
+// Pre: All user created D3DPOOL_DEFAULT surfaces are freed.
+// Post: All user surfaces are recreated.
+//=============================================================================
+void Graphics::changeDisplayMode(graphicsNS::DISPLAY_MODE mode)
+{
+    try{
+        switch(mode)
+        {
+        case graphicsNS::FULLSCREEN:
+            if(fullscreen)      // if already in fullscreen mode
+                return;
+            fullscreen = true; break;
+        case graphicsNS::WINDOW:
+            if(fullscreen == false) // if already in window mode
+                return;
+            fullscreen = false; break;
+        default:        // default to toggle window/fullscreen
+            fullscreen = !fullscreen;
+        }
+        reset();
+        if(fullscreen)  // fullscreen
+        {
+            SetWindowLong(hwnd, GWL_STYLE,  WS_EX_TOPMOST | WS_VISIBLE | WS_POPUP);
+        }
+        else            // windowed
+        {
+            SetWindowLong(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+            SetWindowPos(hwnd, HWND_TOP, 0,0,GAME_WIDTH,GAME_HEIGHT,
+                SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
+            // Adjust window size so client area is GAME_WIDTH x GAME_HEIGHT
+            RECT clientRect;
+            GetClientRect(hwnd, &clientRect);   // get size of client area of window
+            MoveWindow(hwnd,
+                       0,                                           // Left
+                       0,                                           // Top
+                       GAME_WIDTH+(GAME_WIDTH-clientRect.right),    // Right
+                       GAME_HEIGHT+(GAME_HEIGHT-clientRect.bottom), // Bottom
+                       TRUE);                                       // Repaint the window
+        }
+
+    } catch(...)
+    {
+        // An error occured, try windowed mode 
+        SetWindowLong(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+        SetWindowPos(hwnd, HWND_TOP, 0,0,GAME_WIDTH,GAME_HEIGHT,
+            SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
+        // Adjust window size so client area is GAME_WIDTH x GAME_HEIGHT
+        RECT clientRect;
+        GetClientRect(hwnd, &clientRect);   // get size of client area of window
+        MoveWindow(hwnd,
+                    0,                                           // Left
+                    0,                                           // Top
+                    GAME_WIDTH+(GAME_WIDTH-clientRect.right),    // Right
+                    GAME_HEIGHT+(GAME_HEIGHT-clientRect.bottom), // Bottom
+                    TRUE);                                       // Repaint the window
+    }
