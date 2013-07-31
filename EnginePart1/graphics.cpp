@@ -1,7 +1,7 @@
 // Programming 2D Games
 // Copyright (c) 2011,2012 by:
 // Charles Kelly
-// Chapter 4 graphics.cpp v1.1
+// Chapter 5 graphics.cpp v1.1
 
 #include "graphics.h"
 
@@ -12,11 +12,11 @@ Graphics::Graphics()
 {
     direct3d = NULL;
     device3d = NULL;
-	sprite = NULL;
+    sprite = NULL;
     fullscreen = false;
     width = GAME_WIDTH;    // width & height are replaced in initialize()
     height = GAME_HEIGHT;
-    backColor = SETCOLOR_ARGB(255,0,0,128); // dark blue
+    backColor = graphicsNS::BACK_COLOR;
 }
 
 //=============================================================================
@@ -32,7 +32,7 @@ Graphics::~Graphics()
 //=============================================================================
 void Graphics::releaseAll()
 {
-	SAFE_RELEASE(sprite);
+    SAFE_RELEASE(sprite);
     SAFE_RELEASE(device3d);
     SAFE_RELEASE(direct3d);
 }
@@ -87,12 +87,11 @@ void Graphics::initialize(HWND hw, int w, int h, bool full)
 
     if (FAILED(result))
         throw(GameError(gameErrorNS::FATAL_ERROR, "Error creating Direct3D device"));
-
-	result = D3DXCreateSprite(device3d, &sprite);
-	if (FAILED(result))
-		throw(GameError(gameErrorNS::FATAL_ERROR,
-		"Error creating Direct3D sprite"));
  
+    result = D3DXCreateSprite(device3d, &sprite);
+    if (FAILED(result))
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error creating Direct3D sprite"));
+
 }
 
 //=============================================================================
@@ -118,7 +117,6 @@ void Graphics::initD3Dpp()
     {
         throw(GameError(gameErrorNS::FATAL_ERROR, 
                 "Error initializing D3D presentation parameters"));
-
     }
 }
 
@@ -223,7 +221,7 @@ bool Graphics::isAdapterCompatible()
 //=============================================================================
 void Graphics::drawSprite(const SpriteData &spriteData, COLOR_ARGB color)
 {
-	if(spriteData.texture == NULL)      // if no texture
+    if(spriteData.texture == NULL)      // if no texture
         return;
 
     // Find center of sprite
@@ -269,7 +267,6 @@ void Graphics::drawSprite(const SpriteData &spriteData, COLOR_ARGB color)
     sprite->Draw(spriteData.texture,&spriteData.rect,NULL,NULL,color);
 }
 
-
 //=============================================================================
 // Test for lost device
 //=============================================================================
@@ -289,10 +286,12 @@ HRESULT Graphics::reset()
 {
     result = E_FAIL;    // default to fail, replace on success
     initD3Dpp();                        // init D3D presentation parameters
+    sprite->OnLostDevice();
     result = device3d->Reset(&d3dpp);   // attempt to reset graphics device
+
+    sprite->OnResetDevice();
     return result;
 }
-
 
 //=============================================================================
 // Toggle window or fullscreen mode
@@ -354,3 +353,4 @@ void Graphics::changeDisplayMode(graphicsNS::DISPLAY_MODE mode)
                     GAME_HEIGHT+(GAME_HEIGHT-clientRect.bottom), // Bottom
                     TRUE);                                       // Repaint the window
     }
+}

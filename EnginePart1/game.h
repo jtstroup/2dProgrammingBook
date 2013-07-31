@@ -1,10 +1,16 @@
-// Programming 2D Games
-// Copyright (c) 2011 by: 
-// Charles Kelly
-// Chapter 4 game.h v1.0
+//The Game class will contain variables and functions that are common to many games. The 
+//Game class is just a starting point. The Spacewar class we create for our game inherits from 
+//the Game class, so it gets everything defined in the Game class. We can modify the functions 
+//and variables inherited and add new functions and variables if needed.
+//
+//The Game class will have the ability to display graphics and get keyboard input because 
+//it will contain objects of the Input class and the Graphics class. The Game class declaration 
+//with variables and function prototypes is placed in the game.h file,
 
-#ifndef _GAME_H                 // prevent multiple definitions if this 
-#define _GAME_H                 // ..file is included in more than one place
+
+
+#ifndef _GAME_H                 // Prevent multiple definitions if this 
+#define _GAME_H                 // file is included in more than one place
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
@@ -65,6 +71,9 @@ public:
     // Handle lost graphics device
     virtual void handleLostGraphicsDevice();
 
+    // Set display mode (fullscreen, window or toggle)
+    void setDisplayMode(graphicsNS::DISPLAY_MODE mode = graphicsNS::TOGGLE);
+
     // Return pointer to Graphics.
     Graphics* getGraphics() {return graphics;}
 
@@ -91,7 +100,7 @@ public:
     //   draw sprites
     // Call graphics->spriteEnd();
     //   draw non-sprites
-    virtual void render() = 0;
+	virtual void render() = 0;
 };
 
 #endif

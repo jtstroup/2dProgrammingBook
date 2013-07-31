@@ -1,10 +1,21 @@
-// Programming 2D Games
-// Copyright (c) 2011 by:
-// Charles Kelly
-// Chapter 4 graphics.h v1.0
+/*We are going to create a Graphics class to hold all of the DirectX graphics code we have 
+introduced in this chapter. This type of class is typically referred to as a wrapper class. The 
+wrapper class will wrap the DirectX functions inside our own functions and will redefine 
+the DirectX types with our own types. Our functions and types will be used in place of 
+the DirectX equivalent everywhere else in our code. This will limit the use of DirectX 
+specific code to our wrapper classes, which will make it easier to upgrade our code to use 
+different APIs in the future. 
+In our object-oriented design, each class will be written in two files: a header .h file and 
+a source .cpp file. The header file will contain the class declaration, function prototypes, 
+variables, and constants. The source file will contain the bulk of the code. The DirectX defines and class declarations will be placed in graphics.h, as shown in Listing 3.10.
+The source code for the functions is in graphics.cpp. The first two functions are 
+the constructor and destructor. The constructor initializes the variables and the destructor calls the releaseAll function
 
-#ifndef _GRAPHICS_H             // prevent multiple definitions if this 
-#define _GRAPHICS_H             // ..file is included in more than one place
+Charles; Kelly (2012-07-09). Programming 2D Games (Page 47). A. K. Peters. Kindle Edition. 
+*/
+
+#ifndef _GRAPHICS_H             // Prevent multiple definitions if this 
+#define _GRAPHICS_H             // file is included in more than one place
 #define WIN32_LEAN_AND_MEAN
 
 #ifdef _DEBUG
@@ -79,7 +90,7 @@ private:
     // DirectX pointers and stuff
     LP_3D       direct3d;
     LP_3DDEVICE device3d;
-	LP_SPRITE sprite;
+    LP_SPRITE   sprite;
     D3DPRESENT_PARAMETERS d3dpp;
     D3DDISPLAYMODE pMode;
 
@@ -112,7 +123,7 @@ public:
     //      height = height in pixels
     //      fullscreen = true for full screen, false for window
     void    initialize(HWND hw, int width, int height, bool fullscreen);
-	
+
     // Load the texture into default D3D memory (normal texture use)
     // For internal engine use only. Use the TextureManager class to load game textures.
     // Pre: filename = name of texture file.
@@ -132,8 +143,7 @@ public:
     //       Returns false if no compatible mode found.
     bool    isAdapterCompatible();
 
-
-	// Draw the sprite described in SpriteData structure.
+    // Draw the sprite described in SpriteData structure.
     // color is optional, it is applied as a filter, WHITE is default (no change).
     // Creates a sprite Begin/End pair.
     // Pre: spriteData.rect defines the portion of spriteData.texture to draw
@@ -142,11 +152,10 @@ public:
     void    drawSprite(const SpriteData &spriteData,           // sprite to draw
                        COLOR_ARGB color = graphicsNS::WHITE);      // default to white color filter (no change)
 
-
     // Reset the graphics device.
     HRESULT reset();
 
-	// Toggle, fullscreen or window display mode
+    // Toggle, fullscreen or window display mode
     // Pre: All user created D3DPOOL_DEFAULT surfaces are freed.
     // Post: All user surfaces are recreated.
     void    changeDisplayMode(graphicsNS::DISPLAY_MODE mode = graphicsNS::TOGGLE);
@@ -158,17 +167,18 @@ public:
     // Return device3d.
     LP_3DDEVICE get3Ddevice()   { return device3d; }
 
+    // Return sprite
+    LP_SPRITE   getSprite()     { return sprite; }
+
     // Return handle to device context (window).
     HDC     getDC()             { return GetDC(hwnd); }
 
     // Test for lost device
     HRESULT getDeviceState();
 
-    //=============================================================================
-    // Inline functions for speed. How much more speed? It depends on the game and
-    // computer. Improvements of 3 or 4 percent have been observed.
-    //=============================================================================
-
+    // Return fullscreen
+    bool    getFullscreen()     { return fullscreen; }
+ 
     // Set color used to clear screen
     void setBackColor(COLOR_ARGB c) {backColor = c;}
 
@@ -197,7 +207,7 @@ public:
         return result;
     }
 
-	//=============================================================================
+    //=============================================================================
     // Sprite Begin
     //=============================================================================
     void spriteBegin() 
@@ -205,7 +215,7 @@ public:
         sprite->Begin(D3DXSPRITE_ALPHABLEND);
     }
 
-	 //=============================================================================
+    //=============================================================================
     // Sprite End
     //=============================================================================
     void spriteEnd() 

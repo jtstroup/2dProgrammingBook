@@ -1,9 +1,9 @@
 // Programming 2D Games
 // Copyright (c) 2011 by: 
 // Charles Kelly
-// Game Engine Part 1
-// Chapter 4 spacewar.cpp v1.0
-// Spacewar is the class we create.
+// Draw planet with transparency
+// Chapter 5 spacewar.cpp v1.0
+// This class is the core of the game
 
 #include "spaceWar.h"
 
@@ -29,6 +29,25 @@ void Spacewar::initialize(HWND hwnd)
 {
     Game::initialize(hwnd); // throws GameError
 
+    // nebula texture
+    if (!nebulaTexture.initialize(graphics,NEBULA_IMAGE))
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula texture"));
+
+    // planet texture
+    if (!planetTexture.initialize(graphics,PLANET_IMAGE))
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing planet texture"));
+
+    // nebula
+    if (!nebula.initialize(graphics,0,0,0,&nebulaTexture))
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing nebula"));
+
+    // planet
+    if (!planet.initialize(graphics,0,0,0,&planetTexture))
+        throw(GameError(gameErrorNS::FATAL_ERROR, "Error initializing planet"));
+    // place planet in center of screen
+    planet.setX(GAME_WIDTH*0.5f  - planet.getWidth()*0.5f);
+    planet.setY(GAME_HEIGHT*0.5f - planet.getHeight()*0.5f);
+
     return;
 }
 
@@ -36,7 +55,13 @@ void Spacewar::initialize(HWND hwnd)
 // Update all game items
 //=============================================================================
 void Spacewar::update()
-{}
+{
+
+
+	graphics>setBackColor(SETCOLOR_ARGB(255,red,green,blue));
+
+
+}
 
 //=============================================================================
 // Artificial Intelligence
@@ -52,9 +77,22 @@ void Spacewar::collisions()
 
 //=============================================================================
 // Render game items
+
+//The renderGame function. Our Game class’s renderGame function begins a scene, 
+//calls our render function, and then ends the scene. It also tests for and handles lost 
+//graphics devices and then displays the back buffer to the screen.
+
+
 //=============================================================================
 void Spacewar::render()
-{}
+{
+    graphics->spriteBegin();                // begin drawing sprites
+
+    nebula.draw();                          // add the orion nebula to the scene
+    planet.draw();                          // add the planet to the scene
+
+    graphics->spriteEnd();                  // end drawing sprites
+}
 
 //=============================================================================
 // The graphics device was lost.
@@ -62,6 +100,9 @@ void Spacewar::render()
 //=============================================================================
 void Spacewar::releaseAll()
 {
+    planetTexture.onLostDevice();
+    nebulaTexture.onLostDevice();
+
     Game::releaseAll();
     return;
 }
@@ -72,6 +113,9 @@ void Spacewar::releaseAll()
 //=============================================================================
 void Spacewar::resetAll()
 {
+    nebulaTexture.onResetDevice();
+    planetTexture.onResetDevice();
+
     Game::resetAll();
     return;
 }

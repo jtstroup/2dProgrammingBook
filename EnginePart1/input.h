@@ -1,7 +1,14 @@
-// Programming 2D Games
-// Copyright (c) 2011,2012 by: 
-// Charles Kelly
-// input.h v1.1
+//The Input class has code that is used to handle keyboard, mouse, and game controller 
+//input. Two states are stored for each key:
+//1. Is the key currently down?
+//2. Was the key pressed during the current game loop?
+// Those states are stored in two arrays: keysDown and keysPressed, respectively. The two 
+//arrays are cleared at the end of each game loop.
+//Text characters that the user types are stored in the textIn string. The mouse position 
+//and button states are stored in the variables, as described by the comments in Listing 4.14. 
+//The game controller data is stored in the controllers array.
+//
+//Charles; Kelly (2012-07-09). Programming 2D Games (Page 86). A. K. Peters. Kindle Edition. 
 
 #ifndef _INPUT_H                // Prevent multiple definitions if this 
 #define _INPUT_H                // file is included in more than one place
